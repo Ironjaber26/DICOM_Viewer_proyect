@@ -1,0 +1,12 @@
+Metadata-Version: 2.4
+Name: dicom-tools
+Version: 0.1.0
+Summary: Kit sencillo para leer, inspeccionar, anonimizar y visualizar imagenes DICOM
+Requires-Python: >=3.10
+License-File: LICENSE
+Requires-Dist: pydicom>=3.0
+Requires-Dist: numpy>=2.0
+Requires-Dist: matplotlib>=3.9
+Requires-Dist: pillow>=11.0
+Requires-Dist: pandas>=2.2
+Dynamic: license-file
