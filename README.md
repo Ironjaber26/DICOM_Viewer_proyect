@@ -2,65 +2,73 @@
 This is a simple viewer of DICOM images... simple huh
 # DICOM Tools
 
-Kit sencillo en Python para leer, inspeccionar, anonimizar y visualizar imágenes médicas en formato **DICOM**, construido como práctica de ingeniería biomédica en imágenes médicas (uso de `pydicom`, `numpy`, `matplotlib`, `pandas`).
+A simple Python toolkit to read, inspect, anonymize and visualize **DICOM** medical images, built as a biomedical/medical imaging engineering practice project (using `pydicom`, `numpy`, `matplotlib`, `pandas`).
 
-No incluye datos reales de pacientes: el proyecto genera su propio archivo DICOM sintético para pruebas y demos, evitando cualquier problema de privacidad/habeas data.
+No real patient data included: the project generates its own synthetic DICOM file for tests and demos, avoiding any privacy/data-protection concerns.
 
-## Características
 
-- **Lectura**: cargar cualquier archivo `.dcm` y validar si un archivo es DICOM.
-- **Extracción de metadatos**: una sola función (`extract_dicom_info`) que devuelve la información clave del paciente, estudio, serie, equipo e imagen, ya organizada y con valores por defecto seguros.
-- **Píxeles**: conversión de los valores crudos a unidades reales (p. ej. Hounsfield Units) aplicando `RescaleSlope`/`RescaleIntercept`, y *windowing* (contraste) automático o manual.
-- **Visualización**: mostrar una imagen DICOM con un título con su metadata (modalidad, región anatómica, dimensiones).
-- **Anonimización básica**: limpiar los identificadores directos más comunes (nombre, ID, fechas, institución, médicos) antes de compartir o analizar datos.
-- **Análisis por lotes**: escanear una carpeta completa de archivos DICOM y obtener una tabla (`pandas.DataFrame`) resumen, útil para explorar un estudio/serie exportado desde un PACS.
-- **Volumen 3D**: apilar todos los cortes (slices) de una serie DICOM en un solo volumen 3D de numpy, ordenados por posición física real (no solo por nombre de archivo) — funciona tanto con una carpeta de un archivo por corte, como con un solo archivo multi-frame (ej. RM "Enhanced", cine de ecografía).
-- **Visor interactivo**: navegar los cortes de un volumen con la rueda del mouse y cambiar entre plano axial/coronal/sagital con el teclado, con una superposición estilo PACS mostrando nombre, ID, sexo/edad, modalidad, estudio e institución.
 
-## Estructura del proyecto
+## Features
+
+- **Reading**: load any `.dcm` file and validate whether a file is DICOM.
+- **Metadata extraction**: a single function (`extract_dicom_info`) that returns the key patient, study, series, equipment and image information, already organized with safe defaults.
+- **Pixels**: convert raw stored values to real-world units (e.g. Hounsfield Units) using `RescaleSlope`/`RescaleIntercept`, plus automatic or manual windowing (contrast).
+- **Visualization**: display a DICOM image with a title showing its metadata (modality, body region, dimensions).
+- **Basic anonymization**: clear the most common direct identifiers (name, ID, dates, institution, physicians) before sharing or analyzing data.
+- **Batch analysis**: scan a whole folder of DICOM files and get a summary table (`pandas.DataFrame`), useful for exploring a study/series exported from a PACS.
+- **3D volume**: stack all the slices of a DICOM series into a single 3D numpy volume, ordered by real physical position (not just by file name) — works with either a folder of one-file-per-slice DICOMs, or a single multi-frame file (e.g. "Enhanced" MR storage, ultrasound cine loops).
+- **Interactive viewer**: scroll through a volume's slices with the mouse wheel and switch between axial/coronal/sagittal plane with the keyboard, with a PACS-style overlay showing name, ID, sex/age, modality, study and institution.
+
+## Project structure
 
 ```
 dicom_tools/
-├── reader.py        # cargar y validar archivos DICOM
-├── info.py          # extract_dicom_info(): la función principal de metadatos
-├── pixels.py         # conversión de píxeles y windowing
-├── viewer.py         # visualización con matplotlib (imagen unica y volumen 3D)
-├── anonymizer.py      # anonimización básica
-├── batch.py           # escaneo de carpetas -> DataFrame
-└── volume.py          # load_volume(): apilar una serie completa en un volumen 3D
+├── reader.py        # load and validate DICOM files
+├── info.py          # extract_dicom_info(): the main metadata function
+├── pixels.py         # pixel conversion and windowing
+├── viewer.py         # matplotlib visualization (single image and 3D volume)
+├── anonymizer.py      # basic anonymization
+├── batch.py           # folder scanning -> DataFrame
+└── volume.py          # load_volume(): stack a full series into a 3D volume
 
-scripts/generate_sample_dicom.py    # genera un DICOM sintético (una sola imagen) para pruebas
-scripts/generate_sample_series.py   # genera una serie sintética completa (varios cortes) para pruebas
-scripts/show_info.py                 # imprime la metadata de un archivo .dcm desde la terminal
-scripts/view_dicom.py                # ver un archivo .dcm (o un cuadro de uno multi-frame) desde la terminal
-scripts/view_planes.py               # ver los 3 planos (axial/coronal/sagital) a la vez, estático
-scripts/explore_dicom.py             # visor interactivo: navegar cortes y cambiar de plano (por ruta)
-scripts/dicom_viewer.py              # LO MAS FACIL: ventana para elegir archivo/carpeta + visor interactivo
-examples/quick_start.py              # demo completa de uso
-tests/                                # pruebas unitarias (pytest)
-data/sample_dicom/                    # DICOM de ejemplo (sintético, no es un paciente real)
+scripts/generate_sample_dicom.py    # generates a synthetic DICOM (single image) for testing
+scripts/generate_sample_series.py   # generates a full synthetic series (several slices) for testing
+scripts/dicom_viewer.py              # single viewer: metadata, single image, 3 planes, or interactive exploration
+examples/quick_start.py              # full usage demo
+tests/                                # unit tests (pytest)
+data/sample_dicom/                    # example DICOM (synthetic, not a real patient)
 ```
 
-## Instalación
+## Installation
 
 ```bash
 pip install -r requirements.txt
 pip install -e .
 ```
 
-El segundo comando instala `dicom_tools` en modo editable, para que `import dicom_tools` funcione sin importar desde dónde ejecutes tus scripts (terminal, VS Code, etc.).
+The second command installs `dicom_tools` in editable mode, so `import dicom_tools` works no matter where you run your scripts from (terminal, VS Code, etc.).
 
-## Uso rápido
+## Quick start
 
-La forma más simple de usar todo el proyecto (sin escribir código ni recordar rutas): abre una ventana para elegir un archivo o carpeta, detecta automáticamente si es una imagen simple, un archivo multi-frame o una serie completa, y abre el visor interactivo:
+The whole viewer lives in a single script: **`scripts/dicom_viewer.py`**. With no arguments, it opens a window to pick a file or folder; it auto-detects whether it's a plain image, a multi-frame file, or a full series, and opens the interactive viewer:
 
 ```bash
 python scripts/dicom_viewer.py
 ```
 
-Controles en la ventana del visor: **rueda del mouse** = navegar cortes, **teclas `a`/`c`/`s`** = cambiar entre plano axial/coronal/sagital (deshabilitado si la imagen tiene un solo corte).
+Controls in the viewer window: **mouse wheel** = navigate slices, **keys `a`/`c`/`s`** = switch between axial/coronal/sagittal plane (disabled if the image has only one slice).
 
-### Uso por código
+You can also pass the path directly (skipping the dialog) and pick other modes:
+
+```bash
+python scripts/dicom_viewer.py "path/to/file_or_folder"       # interactive viewer, no dialog
+python scripts/dicom_viewer.py "path/to/file.dcm" --info       # only prints the metadata (JSON)
+python scripts/dicom_viewer.py "path/to/file.dcm" --static     # the 3 planes at once, static
+python scripts/dicom_viewer.py "path/to/file.dcm" --static --save planes.png
+python scripts/dicom_viewer.py "path/to/file.dcm" --window-center 40 --window-width 400
+```
+
+### Using it from code
 
 ```python
 from dicom_tools import extract_dicom_info
@@ -70,47 +78,34 @@ info = extract_dicom_info("data/sample_dicom/ct_sample.dcm")
 print(info.modality)          # "CT"
 print(info.patient_id)        # "SIM0001"
 print(info.rows, info.columns)  # 128 128
-print(info.to_dict())         # dict listo para JSON / pandas
+print(info.to_dict())         # dict ready for JSON / pandas
 ```
 
-Ver la metadata de cualquier archivo desde la terminal (sin escribir Python):
-
-```bash
-python scripts/show_info.py "ruta/a/archivo.dcm"
-```
-
-Generar el archivo de ejemplo (si no existe todavía):
+Generate the sample file (if it doesn't exist yet):
 
 ```bash
 python scripts/generate_sample_dicom.py
 ```
 
-Demo completa (metadatos + anonimización + escaneo por lotes + visualización):
+Full demo (metadata + anonymization + batch scanning + visualization):
 
 ```bash
 python examples/quick_start.py
 ```
 
-Escanear una carpeta completa de DICOMs:
+Scan a whole folder of DICOMs:
 
 ```python
 from dicom_tools import scan_directory
 
-df = scan_directory("ruta/a/carpeta_con_dicoms")
+df = scan_directory("path/to/folder_with_dicoms")
 df.head()
 ```
 
-Visualizar cualquier archivo `.dcm` desde la terminal:
+Load a full series (several slices) as a 3D volume:
 
 ```bash
-python scripts/view_dicom.py "ruta/a/archivo.dcm"
-python scripts/view_dicom.py "ruta/a/archivo.dcm" --window-center 40 --window-width 400
-```
-
-Cargar una serie completa (varios cortes) como un volumen 3D:
-
-```bash
-python scripts/generate_sample_series.py   # genera 20 cortes sinteticos de ejemplo
+python scripts/generate_sample_series.py   # generates 20 synthetic sample slices
 ```
 
 ```python
@@ -118,38 +113,23 @@ from dicom_tools import load_volume
 from dicom_tools.viewer import show_volume_slices
 
 vol = load_volume("data/sample_dicom/series")
-print(vol.shape)     # (20, 128, 128) -> (cortes, filas, columnas)
-print(vol.spacing)   # (espaciado_entre_cortes_mm, alto_pixel_mm, ancho_pixel_mm)
+print(vol.shape)     # (20, 128, 128) -> (slices, rows, columns)
+print(vol.spacing)   # (slice_spacing_mm, row_spacing_mm, col_spacing_mm)
 
-show_volume_slices(vol)   # muestra axial, coronal y sagital del centro del volumen
+show_volume_slices(vol)   # shows axial, coronal and sagittal at the volume's center
 ```
 
-O desde la terminal, sin escribir Python (equivalente a lo anterior):
+Or from the terminal, without writing Python (equivalent to the above): `python scripts/dicom_viewer.py data/sample_dicom/series --static`.
 
-```bash
-python scripts/view_planes.py data/sample_dicom/series
-```
-
-Explorar un volumen de forma interactiva (rueda del mouse = navegar cortes, teclas `a`/`c`/`s` = cambiar de plano). Funciona con una carpeta de una serie, un archivo multi-frame, o incluso una imagen simple (en ese caso el cambio de plano queda deshabilitado, ya que no hay más cortes):
-
-```bash
-python scripts/explore_dicom.py data/sample_dicom/series
-python scripts/explore_dicom.py "C:/ruta/a/un_archivo_multiframe.dcm"
-```
-
-O simplemente usa `python scripts/dicom_viewer.py` y elige el archivo/carpeta desde la ventana, sin tener que escribir la ruta en la terminal.
-
-## Pruebas
+## Tests
 
 ```bash
 pip install pytest
 pytest
 ```
 
-## Notas sobre la anonimización
+## Notes on anonymization
 
-`anonymize_dataset` es una implementación educativa que limpia los identificadores directos más comunes (nombre, ID, fecha de nacimiento, institución, médicos). **No es una herramienta certificada** de-identificación clínica: para uso en investigación/producción se debe usar una herramienta validada (p. ej. RSNA CTP, dcmtk) y confirmar el perfil de anonimización exigido por el comité de ética/IRB correspondiente.
+`anonymize_dataset` is a teaching implementation that clears the most common direct identifiers (name, ID, birth date, institution, physicians). **It is not a certified** clinical de-identification tool: for research/production use, rely on a validated tool (e.g. RSNA CTP, dcmtk) and confirm the anonymization profile required by your ethics/IRB committee.
 
-## Motivación
 
-Proyecto de práctica para aplicar y demostrar manejo de imágenes DICOM en el contexto de una postulación como ingeniero biomédico en imágenes médicas.
